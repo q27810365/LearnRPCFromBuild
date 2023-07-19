@@ -10,6 +10,10 @@ import io.netty.handler.codec.serialization.ClassResolver;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
 import lombok.AllArgsConstructor;
+import org.example.client.NettyClientHandler;
+import org.example.codec.JsonSerializer;
+import org.example.codec.MyDecode;
+import org.example.codec.MyEncode;
 
 @AllArgsConstructor
 public class NettyServerInitializer extends ChannelInitializer<SocketChannel> {
@@ -18,19 +22,8 @@ public class NettyServerInitializer extends ChannelInitializer<SocketChannel> {
     @Override
     protected void initChannel(SocketChannel socketChannel) throws Exception {
         ChannelPipeline channelPipeline = socketChannel.pipeline();
-        // 消息格式 [长度][消息体], 解决粘包问题
-        channelPipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE,
-                0,4,0,4));
-        // 计算当前待发送消息的长度，写入到前4个字节中
-        channelPipeline.addLast(new LengthFieldPrepender(4));
-
-        channelPipeline.addLast(new ObjectEncoder());
-        channelPipeline.addLast(new ObjectDecoder(new ClassResolver() {
-            @Override
-            public Class<?> resolve(String s) throws ClassNotFoundException {
-                return Class.forName(s);
-            }
-        }));
+        channelPipeline.addLast(new MyDecode());
+        channelPipeline.addLast(new MyEncode(new JsonSerializer()));
         channelPipeline.addLast(new NettyRPCServerHandler(serviceProvider));
     }
 }
