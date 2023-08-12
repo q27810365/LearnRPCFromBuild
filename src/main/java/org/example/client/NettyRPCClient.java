@@ -9,15 +9,19 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.AttributeKey;
 import org.example.common.RPCRequest;
 import org.example.common.RPCResponse;
+import org.example.register.ServiceRegister;
+import org.example.register.ZKServiceRegister;
+
+import java.net.InetSocketAddress;
 
 public class NettyRPCClient implements RPCClient {
     private static final Bootstrap bootstrap;
     private static final EventLoopGroup eventLoopGroup;
     private String host;
     private int port;
-    public NettyRPCClient(String host, int port) {
-        this.host = host;
-        this.port = port;
+    private ServiceRegister serviceRegister;
+    public NettyRPCClient() {
+        this.serviceRegister = new ZKServiceRegister();
     }
 
     static {
@@ -32,6 +36,10 @@ public class NettyRPCClient implements RPCClient {
      */
     @Override
     public RPCResponse sendRequest(RPCRequest rpcRequest) {
+        InetSocketAddress address = serviceRegister.serviceDiscovery(rpcRequest.getInterfaceName());
+        host = address.getHostName();
+        port = address.getPort();
+
         try {
             ChannelFuture channelFuture = bootstrap.connect(host, port).sync();
             Channel channel = channelFuture.channel();

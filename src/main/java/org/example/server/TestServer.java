@@ -11,11 +11,11 @@ public class TestServer {
         UserServiceImpl userService = new UserServiceImpl();
         BlogServiceImpl blogService = new BlogServiceImpl();
 
-        ServiceProvider serviceProvider = new ServiceProvider();
+        ServiceProvider serviceProvider = new ServiceProvider("127.0.0.1", 8899);
         serviceProvider.provideServiceInterface(userService);
         serviceProvider.provideServiceInterface(blogService);
 
         RPCServer rpcServer = new NettyRPCServer(serviceProvider);
-        rpcServer.start(8877);
+        rpcServer.start(8899);
     }
 }

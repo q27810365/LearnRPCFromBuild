@@ -7,7 +7,7 @@ import org.example.service.UserService;
 
 public class TestClient {
     public static void main(String[] args) {
-        RPCClient rpcClient = new NettyRPCClient("127.0.0.1", 8877);
+        RPCClient rpcClient = new NettyRPCClient();
         RPCClientProxy rpcClientProxy = new RPCClientProxy(rpcClient);
         UserService userService = rpcClientProxy.getProxy(UserService.class);
         User userByUserId = userService.getUserByUserId(10);

@@ -3,10 +3,13 @@ package org.example.client;
 import lombok.AllArgsConstructor;
 import org.example.common.RPCRequest;
 import org.example.common.RPCResponse;
+import org.example.register.ServiceRegister;
+import org.example.register.ZKServiceRegister;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
@@ -14,8 +17,18 @@ import java.net.UnknownHostException;
 public class SimpleRPCClient implements RPCClient {
     private String host;
     private int port;
+    private ServiceRegister serviceRegister;
+
+    public SimpleRPCClient() {
+        this.serviceRegister = new ZKServiceRegister();
+    }
     @Override
     public RPCResponse sendRequest(RPCRequest rpcRequest) {
+
+        InetSocketAddress address = serviceRegister.serviceDiscovery(rpcRequest.getInterfaceName());
+        host = address.getHostName();
+        port = address.getPort();
+
         try {
             Socket socket = new Socket(host,port);
 
